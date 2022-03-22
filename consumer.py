@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from base64 import decode
 from confluent_kafka import Consumer, KafkaException
 import sys
 import logging
@@ -43,7 +44,9 @@ if __name__ == '__main__':
             if msg.error():
                 raise KafkaException(msg.error())
             else:
-                cv.imshow('frame', decodeFromBytes(msg.value()))
+                frame=decodeFromBytes(msg.value())
+                if  not (frame is None):
+                    cv.imshow('frame', frame)
                 if cv.waitKey(1) == ord('q'):
                     break
     except KeyboardInterrupt:
