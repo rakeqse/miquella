@@ -1,21 +1,21 @@
 #!/usr/bin/env python
-from confluent_kafka import Producer
-import cv2 as cv
+
+
 import sys
+
+import cv2 as cv
+from confluent_kafka import Producer
 
 from utils import encodeToBytes
 
-if __name__ == '__main__':
-    # if len(sys.argv) != 3:
-    #     sys.stderr.write('Usage: %s <bootstrap-brokers> <topic>\n' % sys.argv[0])
-    #     sys.exit(1)
+if __name__ == "__main__":
 
     broker = "localhost:9092"
     topic = "stream-kafka"
 
     # Producer configuration
     # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
-    conf = {'bootstrap.servers': broker}
+    conf = {"bootstrap.servers": broker}
 
     # Create Producer instance
     p = Producer(**conf)
@@ -26,17 +26,20 @@ if __name__ == '__main__':
     # failed delivery (after retries).
     def delivery_callback(err, msg):
         if err:
-            sys.stderr.write('%% Message failed delivery: %s\n' % err)
+            sys.stderr.write("%% Message failed delivery: %s\n" % err)
         else:
-            sys.stderr.write('%% Message delivered to %s [%d] @ %d\n' %
-                             (msg.topic(), msg.partition(), msg.offset()))
+            sys.stderr.write(
+                "%% Message delivered to %s [%d] @ %d\n"
+                % (msg.topic(), msg.partition(), msg.offset())
+            )
+
     try:
-        while(True):
+        while True:
             success, frame = cam.read()
             try:
                 p.produce(topic, encodeToBytes(frame), callback=delivery_callback)
             except BufferError:
-                print('some thing when wrong')
+                print("some thing when wrong")
             p.poll(0)
     except:
         print("\nExiting.")
