@@ -6,13 +6,13 @@ import sys
 import logging
 import cv2 as cv
 
-from utils import decodeFromBytes
+from utils import decodeFromProto
 
 
 if __name__ == '__main__':
     broker = "pi.viole.in:9092"
     group = "stream-group"
-    topics = ['stream-kafka']
+    topics = ['stream-kafka-proto']
     # Consumer configuration
     # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
     conf = {'bootstrap.servers': broker, 'group.id': group, 'session.timeout.ms': 6000,
@@ -44,7 +44,7 @@ if __name__ == '__main__':
             if msg.error():
                 raise KafkaException(msg.error())
             else:
-                frame=decodeFromBytes(msg.value())
+                frame=decodeFromProto(msg.value())
                 if  not (frame is None):
                     cv.imshow('frame', frame)
                 if cv.waitKey(1) == ord('q'):
