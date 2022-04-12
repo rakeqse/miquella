@@ -1,19 +1,17 @@
-# miquella
-
-[log](https://rakqese.viole.in)
+# miquella | [log](https://rakeqse.viole.in)
 
 stream with `kafka`, serialize with `protobuf`, transform image with `opencv`
 
 ## requirements
 
 ```
-docker kafka libkafkard python, virtualenv,..
+docker kafka librdkafka python virtualenv
 ```
 
 ## installation
 
 ```
-pip install -r requirements
+pip install -r requirements.txt
 ```
 
 ## start things up
