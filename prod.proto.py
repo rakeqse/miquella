@@ -6,12 +6,12 @@ import sys
 import cv2 as cv
 from confluent_kafka import Producer
 
-from utils import encodeToBytes
+from utils import encodeToProto
 
 if __name__ == "__main__":
 
     broker = "pi.viole.in:9092"
-    topic = "stream-kafka"
+    topic = "stream-kafka-proto"
 
     # Producer configuration
     # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         while True:
             success, frame = cam.read()
             try:
-                p.produce(topic, encodeToBytes(frame), callback=delivery_callback)
+                p.produce(topic, encodeToProto(frame), callback=delivery_callback)
             except BufferError:
                 print("some thing when wrong")
             p.poll(0)
