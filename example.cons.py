@@ -19,10 +19,9 @@
 # Example high-level Kafka 0.9 balanced Consumer
 #
 from confluent_kafka import Consumer, KafkaException
-import sys
-import getopt
 import json
 import logging
+import sys
 from pprint import pformat
 
 
@@ -42,7 +41,7 @@ def print_usage_and_exit(program_name):
 
 
 if __name__ == '__main__':
-    broker = "localhost:9092"
+    broker = "pi.viole.in:9092"
     group = "example-group"
     topics = ['example-topic']
     # Consumer configuration

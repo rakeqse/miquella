@@ -28,7 +28,7 @@ if __name__ == '__main__':
     #     sys.stderr.write('Usage: %s <bootstrap-brokers> <topic>\n' % sys.argv[0])
     #     sys.exit(1)
 
-    broker = "localhost:9092"
+    broker = "pi.viole.in:9092"
     topic = "example-topic"
 
     # Producer configuration
