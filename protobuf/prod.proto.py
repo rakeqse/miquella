@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+
+
 import sys
 
 import cv2 as cv
 from confluent_kafka import Producer
 
-from decode import encodeToProto
+from utils import encodeToProto
 
 if __name__ == "__main__":
 
@@ -17,7 +19,7 @@ if __name__ == "__main__":
 
     # Create Producer instance
     p = Producer(**conf)
-    cam = cv.VideoCapture("Junction2.avi")  # TODO: consume the video
+    cam = cv.VideoCapture(0)
 
     # Optional per-message delivery callback (triggered by poll() or flush())
     # when a message has been successfully delivered or permanently
@@ -30,6 +32,7 @@ if __name__ == "__main__":
                 "%% Message delivered to %s [%d] @ %d\n"
                 % (msg.topic(), msg.partition(), msg.offset())
             )
+
     try:
         while True:
             success, frame = cam.read()
