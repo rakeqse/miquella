@@ -8,7 +8,7 @@ import asyncio
 import websockets
 import functools
 
-from decode import decodeFromProto
+from serde import decodeFromProto
 
 broker = "pi.viole.in:9092"
 group = "stream-group"
