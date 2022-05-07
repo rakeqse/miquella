@@ -3,16 +3,15 @@
 from confluent_kafka import Consumer, KafkaException
 import cv2 as cv
 import logging
-import torch
 import asyncio
 import websockets
 import functools
 
-from decode import decodeFromProto
+from serde import decodeResult
 
 broker = "pi.viole.in:9092"
 group = "stream-group"
-topics = ["stream-kafka-proto"]
+topics = ["result-topic"]
 # Consumer configuration
 # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
 conf = {
@@ -21,8 +20,6 @@ conf = {
     "session.timeout.ms": 6000,
     "auto.offset.reset": "earliest",
 }
-
-model = torch.hub.load("ultralytics/yolov5", "yolov5s")
 
 # Create logger for consumer (logs will be emitted when poll() is called)
 logger = logging.getLogger("consumer")
@@ -67,14 +64,12 @@ async def run():
             if msg.error():
                 raise KafkaException(msg.error())
             else:
-                frame = decodeFromProto(msg.value())
+                frame = decodeResult(msg.value())
                 if not (frame is None):
-                    results = model(frame)
-                    results.render()
-
-                    websockets.broadcast(
-                        CONNECTION, results.pandas().xyxy[0].to_json(orient="records")
-                    )
+                    websockets.broadcast(CONNECTION, frame["result"])
+                    cv.imshow("frame", frame["img"])
+                if cv.waitKey(1) == ord("q"):
+                    break
                     # socket.send(results.print()) here
     finally:
         # Close down consumer to commit final offsets.

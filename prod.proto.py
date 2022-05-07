@@ -3,13 +3,12 @@ import sys
 
 import cv2 as cv
 from confluent_kafka import Producer
-
-from decode import encodeToProto
+from serde import encodeToProto, encodeToRaw
 
 if __name__ == "__main__":
 
     broker = "pi.viole.in:9092"
-    topic = "stream-kafka-proto"
+    topic = "stream-kafka-proto2"
 
     # Producer configuration
     # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
@@ -30,14 +29,15 @@ if __name__ == "__main__":
                 "%% Message delivered to %s [%d] @ %d\n"
                 % (msg.topic(), msg.partition(), msg.offset())
             )
+
     try:
         while True:
             success, frame = cam.read()
             try:
-                p.produce(topic, encodeToProto(frame), callback=delivery_callback)
+                p.produce(topic, encodeToRaw(frame), callback=delivery_callback)
             except BufferError:
                 print("some thing when wrong")
-            p.poll(0)
+            p.poll(0)  # this is for callback purpose
     except:
         print("\nExiting.")
         cam.release()
