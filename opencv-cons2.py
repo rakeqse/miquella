@@ -52,6 +52,7 @@ if __name__ == "__main__":
                 frame = decodeResult(msg.value())
                 if not (frame["img"] is None):
                     cv.imshow("frame", frame["img"])
+                    cv.imshow("frame2", frame["img"])
                     print(frame["result"])
                 if cv.waitKey(1) == ord("q"):
                     break
