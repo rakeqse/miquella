@@ -19,18 +19,45 @@ def encodeToRaw(frame):
 
 
 def decodeFromRaw(buffer):
-    message = Raw()
-    message.ParseFromString(buffer)
-    nparr = np.frombuffer(message.frame, np.uint8)
+    m = Raw()
+    m.ParseFromString(buffer)
+    nparr = np.frombuffer(m.frame, np.uint8)
     # decode image
     img = cv.imdecode(nparr, cv.IMREAD_COLOR)
-    return img
+    return {
+        "cameraID": m.cameraID,
+        "frame": m.frame,
+        "timestamp": m.timestamp,
+        "img": img,
+    }
+
+
+def encodeResult(result):
+    m = Result()
+    m.cameraID = result["cameraID"]
+    m.frame = encodeToBytes(result["frame"])
+    m.timestamp = result["timestamp"]
+    m.result = result["result"]
+    return m.SerializeToString()
+
+
+def decodeResult(buffer):
+    m = Result()
+    m.ParseFromString(buffer)
+    nparr = np.frombuffer(m.frame, np.uint8)
+    # decode image
+    img = cv.imdecode(nparr, cv.IMREAD_COLOR)
+    return {
+        "cameraID": m.cameraID,
+        "frame": m.frame,
+        "timestamp": m.timestamp,
+        "img": img,
+        "result": m.result,
+    }
 
 
 def encodeToBytes(frame):  # convert to grayscale, resize and return bytes
-    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-    gray = cv.resize(gray, [640, 480])
-    _, buffer = cv.imencode(".jpg", gray)
+    _, buffer = cv.imencode(".jpg", frame)
     return buffer.tobytes()
 
 

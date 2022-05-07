@@ -4,16 +4,14 @@ from confluent_kafka import Consumer, KafkaException
 import sys
 import logging
 import cv2 as cv
-import torch
 
-from serde import decodeFromRaw
+from serde import decodeResult
 
 
 if __name__ == "__main__":
-    model = torch.hub.load("ultralytics/yolov5", "yolov5s")
     broker = "pi.viole.in:9092"
-    group = "stream-group"
-    topics = ["stream-kafka-proto2"]
+    group = "stream-opencv-group"
+    topics = ["result-topic"]
     # Consumer configuration
     # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
     conf = {
@@ -51,11 +49,10 @@ if __name__ == "__main__":
             if msg.error():
                 raise KafkaException(msg.error())
             else:
-                frame = decodeFromRaw(msg.value())
-                if not (frame is None):
-                    results = model(frame)
-                    results.render()
-                    cv.imshow("frame", results.imgs[0])
+                frame = decodeResult(msg.value())
+                if not (frame["img"] is None):
+                    cv.imshow("frame", frame["img"])
+                    print(frame["result"])
                 if cv.waitKey(1) == ord("q"):
                     break
     except KeyboardInterrupt:

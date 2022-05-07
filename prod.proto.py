@@ -37,7 +37,7 @@ if __name__ == "__main__":
                 p.produce(topic, encodeToRaw(frame), callback=delivery_callback)
             except BufferError:
                 print("some thing when wrong")
-            p.poll(0)
+            p.poll(0)  # this is for callback purpose
     except:
         print("\nExiting.")
         cam.release()
