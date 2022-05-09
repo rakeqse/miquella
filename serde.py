@@ -7,12 +7,11 @@ import protobuf.kafka_message_pb2 as kafka_message_pb2
 from schema_pb2 import Raw, Result
 
 
-def encodeToRaw(frame):
+def encodeToRaw(frame, id):
     m = Raw()
-    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-    gray = cv.resize(gray, [640, 480])
+    gray = cv.resize(frame, [640, 480])
     _, buffer = cv.imencode(".jpg", gray)
-    m.cameraID = "1"
+    m.cameraID = id
     m.frame = buffer.tobytes()
     m.timestamp = str(int(datetime.utcnow().timestamp()))
     return m.SerializeToString()

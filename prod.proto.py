@@ -1,14 +1,22 @@
 #!/usr/bin/env python
 import sys
-
+import os
 import cv2 as cv
 from confluent_kafka import Producer
-from serde import encodeToProto, encodeToRaw
+from serde import encodeToRaw
+import argparse
+from dotenv import load_dotenv
 
 if __name__ == "__main__":
+    load_dotenv()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("partition", type=int)
+    parser.add_argument("video", type=str)
 
-    broker = "pi.viole.in:9092"
-    topic = "stream-kafka-proto2"
+    arg = parser.parse_args()
+
+    broker = os.environ.get("BROKER")
+    topic = os.environ.get("VIDEO_TOPIC")
 
     # Producer configuration
     # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
@@ -16,7 +24,7 @@ if __name__ == "__main__":
 
     # Create Producer instance
     p = Producer(**conf)
-    cam = cv.VideoCapture("Junction2.avi")  # TODO: consume the video
+    cam = cv.VideoCapture(arg.video)  # TODO: consume the video
 
     # Optional per-message delivery callback (triggered by poll() or flush())
     # when a message has been successfully delivered or permanently
@@ -34,7 +42,12 @@ if __name__ == "__main__":
         while True:
             success, frame = cam.read()
             try:
-                p.produce(topic, encodeToRaw(frame), callback=delivery_callback)
+                p.produce(
+                    topic,
+                    encodeToRaw(frame, str(arg.partition)),
+                    callback=delivery_callback,
+                    partition=arg.partition,
+                )
             except BufferError:
                 print("some thing when wrong")
             p.poll(0)  # this is for callback purpose
