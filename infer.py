@@ -73,7 +73,7 @@ if __name__ == "__main__":
                     {
                         "cameraID": msg["cameraID"],
                         "frame": img,
-                        "result": json.groupby("name").count()["xmin"].to_json(),
+                        "result": f'{json.groupby("name").count()["xmin"].to_json()},"cameraID":{msg["cameraID"]}',
                         "timestamp": msg["timestamp"],
                     }
                 ),
