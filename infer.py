@@ -47,7 +47,7 @@ if __name__ == "__main__":
         print("Assignment:", partitions)
 
     def poll(consumer):
-        msg = consumer.poll(timeout=1.0)
+        msg = consumer.poll(1.0)
         if msg is None:
             return None
         if msg.error():
@@ -73,11 +73,11 @@ if __name__ == "__main__":
                     {
                         "cameraID": msg["cameraID"],
                         "frame": img,
-                        "result": f'{json.groupby("name").count()["xmin"].to_json()},"cameraID":{msg["cameraID"]}',
+                        "result": f'{json.groupby("name").count()["xmin"].to_json()}|"cameraID":{msg["cameraID"]}',
                         "timestamp": msg["timestamp"],
                     }
                 ),
-                partition=i,
+                partition=int(msg["cameraID"]),
             )
 
     consGroup = []
@@ -95,6 +95,7 @@ if __name__ == "__main__":
             msgs = list(filter(filterNone, map(poll, consGroup)))
             frames = [msg["img"] for msg in msgs]
             results = model(frames)
+            results.print()
             send(msgs, results)
     except KeyboardInterrupt:
         sys.stderr.write("%% Aborted by user\n")
