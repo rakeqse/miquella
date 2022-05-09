@@ -6,11 +6,16 @@ import logging
 import asyncio
 import websockets
 import functools
-
+import argparse
 from serde import decodeResult
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument("partition", type=int)
+
+arg = parser.parse_args()
 broker = "pi.viole.in:9092"
-group = "stream-group"
+group = "ws-group"
 topic = "result-topic"
 # Consumer configuration
 # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
@@ -30,29 +35,14 @@ handler.setFormatter(logging.Formatter("%(asctime)-15s %(levelname)-8s %(message
 logger.addHandler(handler)
 
 
-def print_assignment(consumer, partitions):
-    print("Assignment:", partitions)
-
-
 # Create Consumer instance
 # Hint: try debug='fetch' to generate some log messages
 c = Consumer(conf, logger=logger)
 
-c.assign([TopicPartition(topic, 0)])
-
-CONNECTION = set()
+c.assign([TopicPartition(topic, arg.partition)])
 
 
-async def register(websocket):
-    print("new connection initiate")
-    CONNECTION.add(websocket)
-    try:
-        await websocket.wait_closed()
-    finally:
-        CONNECTION.remove(websocket)
-
-
-async def run():
+async def run(websocket):
     loop = asyncio.get_running_loop()
     poll = functools.partial(c.poll, 1.0)
     try:
@@ -66,10 +56,7 @@ async def run():
             else:
                 frame = decodeResult(msg.value())
                 if not (frame is None):
-                    websockets.broadcast(CONNECTION, frame["result"])
-                    cv.imshow("frame", frame["img"])
-                if cv.waitKey(1) == ord("q"):
-                    break
+                    await websocket.send(frame["result"])
                     # socket.send(results.print()) here
     finally:
         # Close down consumer to commit final offsets.
@@ -78,8 +65,8 @@ async def run():
 
 
 async def main():
-    async with websockets.serve(register, "localhost", "7731"):
-        await run()
+    async with websockets.connect("ws://localhost:7731") as websocket:
+        await run(websocket)
 
 
 if __name__ == "__main__":

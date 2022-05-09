@@ -44,7 +44,7 @@ if __name__ == "__main__":
             try:
                 p.produce(
                     topic,
-                    encodeToRaw(frame),
+                    encodeToRaw(frame, str(arg.partition)),
                     callback=delivery_callback,
                     partition=arg.partition,
                 )
