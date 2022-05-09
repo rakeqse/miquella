@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from confluent_kafka import Consumer, KafkaException
+from confluent_kafka import Consumer, KafkaException, TopicPartition
 import cv2 as cv
 import logging
 import asyncio
@@ -11,7 +11,7 @@ from serde import decodeResult
 
 broker = "pi.viole.in:9092"
 group = "stream-group"
-topics = ["result-topic"]
+topic = "result-topic"
 # Consumer configuration
 # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
 conf = {
@@ -38,7 +38,7 @@ def print_assignment(consumer, partitions):
 # Hint: try debug='fetch' to generate some log messages
 c = Consumer(conf, logger=logger)
 
-c.subscribe(topics, on_assign=print_assignment)
+c.assign([TopicPartition(topic, 0)])
 
 CONNECTION = set()
 

@@ -1,17 +1,25 @@
 #!/usr/bin/env python
 
-from confluent_kafka import Consumer, KafkaException
+from confluent_kafka import Consumer, KafkaException, TopicPartition
 import sys
 import logging
 import cv2 as cv
+import argparse
+from dotenv import load_dotenv
 
 from serde import decodeResult
 
 
 if __name__ == "__main__":
+    load_dotenv()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("partition", type=int)
+
+    arg = parser.parse_args()
+
     broker = "pi.viole.in:9092"
     group = "stream-opencv-group"
-    topics = ["result-topic"]
+    topics = "result-topic"
     # Consumer configuration
     # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
     conf = {
@@ -38,7 +46,7 @@ if __name__ == "__main__":
         print("Assignment:", partitions)
 
     # Subscribe to topics
-    c.subscribe(topics, on_assign=print_assignment)
+    c.assign([TopicPartition(topics, arg.partition)])
 
     # Read messages from Kafka, print to stdout
     try:
@@ -51,8 +59,7 @@ if __name__ == "__main__":
             else:
                 frame = decodeResult(msg.value())
                 if not (frame["img"] is None):
-                    cv.imshow("frame", frame["img"])
-                    cv.imshow("frame2", frame["img"])
+                    cv.imshow(f"frame {arg.partition}", frame["img"])
                     print(frame["result"])
                 if cv.waitKey(1) == ord("q"):
                     break
