@@ -51,8 +51,7 @@ if __name__ == "__main__":
         print("Assignment:", partitions)
 
     # Subscribe to topics
-    c.assign([TopicPartition(topics, arg.partition)])
-
+    c.subscribe([topics], on_assign=print_assignment)
     # Read messages from Kafka, print to stdout
     try:
         while True:
